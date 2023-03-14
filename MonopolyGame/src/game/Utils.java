@@ -91,6 +91,8 @@ public class Utils {
 	 * @return
 	 */
 	public static Player[] loadPlayers() {
+		
+		
 
 		int numPlayers = 0;
 		do {
@@ -124,8 +126,18 @@ public class Utils {
 			System.out.println("Please enter player " + loop + " name");
 
 			// TODO add data validation for player name
-			String name = PlayGame.sc.nextLine();
-
+			String name;
+			do {
+				name = PlayGame.sc.nextLine();
+				
+				if (name.length()<1) {
+					System.out.println("Please enter a longer name");
+				} else if (name.length()>10) {
+					System.out.println("Max character length is 10. Please enter a shorter name");
+				}
+				
+			} while (name.length()<1 || name.length()>10);
+			
 			char specialChar = selectSpecialChar();
 			players[loop - 1] = new Player(name, specialChar, PlayGame.STARTING_CFV, 0);
 		}
@@ -133,37 +145,37 @@ public class Utils {
 		System.out.println();
 		return players;
 	}
+	
+	public static ArrayList<String> loadSpecialChars() {
+		ArrayList<String> specialChars = new ArrayList<>();
+		Collections.addAll(specialChars, "*", "£", "?", "$");
+		return specialChars;
+	}
 
-	public static char selectSpecialChar() {
-
-		// TODO only allow players to select unique chars
-
-		char[] specialChars = { '*', '£', '?', '£' };
-
+	public static char selectSpecialChar() {		
 		System.out.println("Please select character to represent you on the board:");
-
-		for (int loop = 0; loop < specialChars.length; loop++) {
-			System.out.println(loop + 1 + ": " + specialChars[loop]);
+		for (int loop = 0; loop < PlayGame.specialChars.size(); loop++) {
+			System.out.println(loop + 1 + ": " + PlayGame.specialChars.get(loop));
 		}
 
 		int selection = 0;
-
+		
 		do {
 			try {
 				selection = PlayGame.sc.nextInt();
-
 			} catch (Exception e) {
 				selection = 0;
 			}
 			PlayGame.sc.nextLine();
 
-			if (selection < 1 || selection > specialChars.length) {
-				System.out.println("Please input a number between 1 and " + specialChars.length);
+			if (selection < 1 || selection > PlayGame.specialChars.size()) {
+				System.out.println("Please input a number between 1 and " + PlayGame.specialChars.size());
 			}
+		} while (selection < 1 || selection > PlayGame.specialChars.size());
 
-		} while (selection < 1 || selection > specialChars.length);
-
-		char selectedChar = specialChars[selection - 1];
+		char selectedChar = PlayGame.specialChars.get(selection-1).charAt(0);
+		PlayGame.specialChars.remove(selection-1);
+		
 		System.out.println(selectedChar + " selected");
 
 		return selectedChar;
@@ -354,7 +366,6 @@ public class Utils {
 				}
 			}
 		}
-
 	}
 
 	public static void printLine() {

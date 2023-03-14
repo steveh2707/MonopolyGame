@@ -1,5 +1,7 @@
 package game;
 
+import java.util.ArrayList;
+//import java.util.Collections;
 import java.util.Scanner;
 
 import gameobjects.Area;
@@ -9,8 +11,11 @@ import gameobjects.Tile;
 public class PlayGame {
 
 	static Scanner sc = new Scanner(System.in);
+	public static ArrayList<String> specialChars = Utils.loadSpecialChars();
 	public static Tile[] board = Utils.loadBoardTiles();
 	public static Player[] players = Utils.loadPlayers();
+	
+	
 
 	public static final int MAX_ALLOWABLE_CFV = 3000;
 	public static final int STARTING_CFV = 2000;
@@ -20,6 +25,8 @@ public class PlayGame {
 	private static final int SEND_TO_PRIVATE_ISLAND_BOARD_INDEX = 11;
 
 	public static void main(String[] args) {
+		
+		
 
 		int currentPlayerIndex = 0;
 
@@ -79,46 +86,46 @@ public class PlayGame {
 		System.out.println();
 
 		System.out.println("Player: " + currentPlayer.getName());
-		System.out.println("Press enter to roll dice");
-		
-		// TODO add condition that player can leave game here - by entering N
-		
-		PlayGame.sc.nextLine();
+		System.out.println("Press enter to roll dice - or N to leave game");
 
-		int diceRoll = Utils.diceRoll();
-		int playerStartBoardTileIndex = currentPlayer.getCurrentBoardPosition();
-
-		if (diceRoll == -1) {
-			// if 3 doubles are rolled
-			Utils.sendPlayerToPrivateIsland(currentPlayer);
-
+		if (PlayGame.sc.nextLine().equalsIgnoreCase("N")) {
+			currentPlayer.setAlive(false);
+			System.out.println(currentPlayer.getName()+" has left the game");
 		} else {
-			currentPlayer.updateCurrentBoardPosition(diceRoll);
+			int diceRoll = Utils.diceRoll();
+			int playerStartBoardTileIndex = currentPlayer.getCurrentBoardPosition();
 
-			int playerNewBoardTileIndex = currentPlayer.getCurrentBoardPosition();
-			Tile PlayerNewBoardTile = PlayGame.board[playerNewBoardTileIndex];
-
-			System.out.println();
-			System.out.println("Landed on " + PlayerNewBoardTile.getName());
-
-			// special tile logic
-			if (playerNewBoardTileIndex == SEND_TO_PRIVATE_ISLAND_BOARD_INDEX) {
-				// if land on send to private island, send to private island
-				System.out.println("Player Sent to Private Island");
+			if (diceRoll == -1) {
+				// if 3 doubles are rolled
 				Utils.sendPlayerToPrivateIsland(currentPlayer);
-				
-			} else if (playerNewBoardTileIndex <= playerStartBoardTileIndex || diceRoll > 14) {
-				// if pass go
-				System.out.println("Lost " + -CFV_PASSING_GO + " for reaching go");
+
+			} else {
+				currentPlayer.updateCurrentBoardPosition(diceRoll);
+
+				int playerNewBoardTileIndex = currentPlayer.getCurrentBoardPosition();
+				Tile PlayerNewBoardTile = PlayGame.board[playerNewBoardTileIndex];
+
 				System.out.println();
-				currentPlayer.addCFV(CFV_PASSING_GO);
-			}
+				System.out.println("Landed on " + PlayerNewBoardTile.getName());
 
-			if (PlayerNewBoardTile instanceof Area) {
-				Area boardArea = (Area) PlayerNewBoardTile;
-				landedOnAreaLogic(boardArea, currentPlayer);
-			}
+				// special tile logic
+				if (playerNewBoardTileIndex == SEND_TO_PRIVATE_ISLAND_BOARD_INDEX) {
+					// if land on send to private island, send to private island
+					System.out.println("Player Sent to Private Island");
+					Utils.sendPlayerToPrivateIsland(currentPlayer);
 
+				} else if (playerNewBoardTileIndex <= playerStartBoardTileIndex || diceRoll > 14) {
+					// if pass go
+					System.out.println("Lost " + -CFV_PASSING_GO + " for reaching go");
+					System.out.println();
+					currentPlayer.addCFV(CFV_PASSING_GO);
+				}
+
+				if (PlayerNewBoardTile instanceof Area) {
+					Area boardArea = (Area) PlayerNewBoardTile;
+					landedOnAreaLogic(boardArea, currentPlayer);
+				}
+			}
 		}
 
 	}
@@ -147,7 +154,7 @@ public class PlayGame {
 				System.out.println("Area put up for auction");
 				Utils.auction(boardArea);
 			}
-			
+
 		} else if (Utils.doesCurrentPlayerOwnZone(currentPlayer, boardArea.getZone())) {
 			// if current player owns zone
 
@@ -160,12 +167,12 @@ public class PlayGame {
 				System.out.println(
 						"Area develped to level " + boardArea.getDevelopmentStatus() + " for: " + boardAreaDevCost);
 			}
-			
+
 		} else if (currentPlayer == boardArea.getCurrentOwner()) {
 			// if current player owns area only
 
 			System.out.println("You own this area, nothing happens");
-			
+
 		} else {
 			// if another player owns board position
 
